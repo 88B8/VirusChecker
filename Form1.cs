@@ -19,38 +19,52 @@ namespace VirusChecker
                 string filePath = openFileDialog.FileName;
                 try
                 {
-                    string result = await manager.UploadAndAnalyze(filePath, status =>
+                    var scanResult = await manager.UploadAndAnalyze(filePath, status =>
                     {
                         if (InvokeRequired)
                         {
-                            Invoke(new Action<string>(statusMessage => resultLabel.Text = statusMessage), status);
+                            Invoke(new Action<string>(msg => resultLabel.Text = msg), status);
                         }
                         else
                         {
                             resultLabel.Text = status;
                         }
                     });
-                    if (InvokeRequired)
+
+                    if (scanResult.MaliciousCount > 0 || scanResult.TotalEngines > 0)
                     {
-                        Invoke(new Action<string>(statusMessage => resultLabel.Text = statusMessage), result);
+                        string finalMessage = scanResult.IsDangerous
+                            ? $"⚠️ Обнаружено угроз: {scanResult.MaliciousCount} из {scanResult.TotalEngines} антивирусов сработали"
+                            : $"✅ Безопасно: {scanResult.MaliciousCount} из {scanResult.TotalEngines} антивирусов сработали";
+
+                        if (InvokeRequired)
+                        {
+                            Invoke(new Action<string>(msg => resultLabel.Text = msg), finalMessage);
+                        }
+                        else
+                        {
+                            resultLabel.Text = finalMessage;
+                        }
                     }
                     else
                     {
-                        resultLabel.Text = result;
+                        resultLabel.Text = "Файл еще не был проанализирован на VirusTotal.";
                     }
                 }
                 catch (Exception ex)
                 {
+                    string error = "Произошла ошибка: " + ex.Message;
                     if (InvokeRequired)
                     {
-                        Invoke(new Action<string>(statusMessage => resultLabel.Text = statusMessage), "Произошла ошибка: " + ex.Message);
+                        Invoke(new Action<string>(msg => resultLabel.Text = msg), error);
                     }
                     else
                     {
-                        resultLabel.Text = "Произошла ошибка: " + ex.Message;
+                        resultLabel.Text = error;
                     }
                 }
-            } else
+            }
+            else
             {
                 resultLabel.Text = "Файл не выбран";
             }

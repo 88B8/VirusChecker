@@ -1,9 +1,18 @@
 ﻿namespace VirusChecker
 {
+    /// <summary>
+    /// Интерфейс менеджера
+    /// </summary>
     public interface IVirusChecker
     {
-        public Task<string> UploadAndAnalyze(string filePath, Action<string> updateStatus);
+        /// <summary>
+        /// Загружает файл на VirusTotal
+        /// </summary>
+        public Task<ScanResult> UploadAndAnalyze(string filePath, Action<string> updateStatus);
 
-        public Task<string> PollAndAnalysisResult(HttpClient httpClient, string analysisId, Action<string> updateStatus);
+        /// <summary>
+        /// Анализирует результаты с VirusTotal
+        /// </summary>
+        public Task<ScanResult> PollAndAnalysisResult(HttpClient httpClient, string analysisId, string sha256, Action<string> updateStatus);
     }
 }
